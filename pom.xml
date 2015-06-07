@@ -104,4 +104,12 @@
             <url>https://devtools.jahia.com/nexus/content/groups/public</url>
         </repository>
     </repositories>
+    <dependencies>
+        <dependency>
+            <groupId>org.jahia.test</groupId>
+            <artifactId>module-test-framework</artifactId>
+            <version>7.1.0.1-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>    
 </project>
