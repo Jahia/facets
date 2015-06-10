@@ -82,9 +82,12 @@ import org.jahia.services.content.JCRSessionWrapper;
 import org.jahia.services.query.QOMBuilder;
 import org.jahia.services.query.QueryResultWrapper;
 import org.jahia.services.sites.JahiaSite;
-import org.jahia.test.framework.AbstractJahiaTest;
 import org.jahia.test.utils.TestHelper;
+import org.jahia.test.framework.AbstractJUnitTest;
 import org.jahia.utils.LanguageCodeConverters;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
@@ -93,11 +96,9 @@ import javax.jcr.query.qom.QueryObjectModel;
 import javax.jcr.query.qom.QueryObjectModelConstants;
 import javax.jcr.query.qom.QueryObjectModelFactory;
 
-import java.io.IOException;
 import java.util.*;
 
-import org.testng.Assert;
-import org.testng.annotations.*;
+import static org.junit.Assert.*;
 
 /**
  * 
@@ -106,10 +107,10 @@ import org.testng.annotations.*;
  * Time: 5:03:27 PM
  * 
  */
-public class FacetedQueryTest extends AbstractJahiaTest {
-    private static final String DEFAULT_LANGUAGE = "fr";
+public class FacetedQueryTest extends AbstractJUnitTest {
+    private static String DEFAULT_LANGUAGE = "fr";
     
-    private static final String TESTSITE_NAME = "jcrFacetTest";
+    private final static String TESTSITE_NAME = "jcrFacetTest";
     private static final String MEETING = "meeting";
     private static final String CONSUMER_SHOW = "consumerShow";
     private static final String ROAD_SHOW = "roadShow";
@@ -120,10 +121,11 @@ public class FacetedQueryTest extends AbstractJahiaTest {
     private static final String GENEVA = "geneva";
 
 
-//    @BeforeClass
-    public static void oneTimeSetUp() throws Exception {
-        JahiaSite site = TestHelper.createSite(TESTSITE_NAME, null);
-        Assert.assertNotNull(site);
+    @Override
+    public void beforeClassSetup() throws Exception {
+        super.beforeClassSetup();
+        JahiaSite site = TestHelper.createSite(TESTSITE_NAME);
+        assertNotNull(site);
 
         JCRSessionWrapper session = JCRSessionFactory.getInstance().getCurrentUserSession(Constants.EDIT_WORKSPACE,
                 LanguageCodeConverters.languageCodeToLocale(DEFAULT_LANGUAGE));
@@ -131,22 +133,23 @@ public class FacetedQueryTest extends AbstractJahiaTest {
         initContent(session);
     }
 
-//    @AfterClass
-    public static void oneTimeTearDown() throws Exception {
+    @Override
+    public void afterClassSetup() throws Exception {
+        super.afterClassSetup();
         TestHelper.deleteSite(TESTSITE_NAME);
     }
     
-    @BeforeMethod
+    @Before
     public void setUp() {
 
     }
 
-    @AfterMethod
+    @After
     public void tearDown() {
 
     }    
     
-//    @Test
+    @Test
     public void testSimpleFacets() throws Exception {
 
         JCRSessionWrapper session = JCRSessionFactory.getInstance().getCurrentUserSession(Constants.EDIT_WORKSPACE,
@@ -159,9 +162,9 @@ public class FacetedQueryTest extends AbstractJahiaTest {
         res = doQuery(session, "eventsType", "rep:facet(facet.mincount=1)");
         checkResultSize(res, 0);
         field = res.getFacetField("eventsType");
-        Assert.assertNotNull(field, "Facet field is null");
-        Assert.assertNotNull(field.getValues(), "Facet values are null");
-        Assert.assertEquals(6, field.getValues().size(), "Query did not return correct number of facets");
+        assertNotNull("Facet field is null",field);
+        assertNotNull("Facet values are null",field.getValues());
+        assertEquals("Query did not return correct number of facets", 6, field.getValues().size());
         Iterator<FacetField.Count> counts = field.getValues().iterator();
 
         checkFacet(counts.next(), SHOW, 7);
@@ -184,9 +187,9 @@ public class FacetedQueryTest extends AbstractJahiaTest {
         // test facet options : prefix
         res = doQuery(session, "eventsType", "rep:facet(facet.mincount=1&prefix=c)");
         field = res.getFacetField("eventsType");
-        Assert.assertNotNull(field, "Facet field is null");
-        Assert.assertNotNull(field.getValues(), "Facet values are null");
-        Assert.assertEquals(2, field.getValues().size(), "Query did not return correct number of facet values");
+        assertNotNull("Facet field is null",field);
+        assertNotNull("Facet values are null",field.getValues());
+        assertEquals("Query did not return correct number of facet values", 2, field.getValues().size());
         counts = field.getValues().iterator();
 
         checkFacet(counts.next(), CONFERENCE, 5);
@@ -200,9 +203,9 @@ public class FacetedQueryTest extends AbstractJahiaTest {
         // test facet options : sort=false  - lexicographic order
         res = doQuery(session, "eventsType", "rep:facet(facet.mincount=1&sort=index)");
         field = res.getFacetField("eventsType");
-        Assert.assertNotNull(field, "Facet field is null");
-        Assert.assertNotNull(field.getValues(), "Facet values are null");
-        Assert.assertEquals(6, field.getValues().size(), "Query did not return correct number of facet value");
+        assertNotNull("Facet field is null",field);
+        assertNotNull("Facet values are null",field.getValues());
+        assertEquals("Query did not return correct number of facet value", 6, field.getValues().size());
         counts = field.getValues().iterator();
 
         checkFacet(counts.next(), CONFERENCE, 5);
@@ -219,7 +222,7 @@ public class FacetedQueryTest extends AbstractJahiaTest {
 
     }
     
-//    @Test    
+    @Test    
     public void testDateFacets() throws Exception {
 
         JCRSessionWrapper session = JCRSessionFactory.getInstance().getCurrentUserSession(Constants.EDIT_WORKSPACE,
@@ -232,12 +235,12 @@ public class FacetedQueryTest extends AbstractJahiaTest {
         res = doQuery(session, "startDate", "rep:facet(date.start=2000-01-01T00:00:00Z&date.end=2002-01-01T00:00:00Z&date.gap=+1MONTH)");
         field = res.getFacetDate("startDate");
 
-        Assert.assertEquals(24, field.getValues().size(), "Query did not return correct number of facets");
+        assertEquals("Query did not return correct number of facets", 24, field.getValues().size());
         
         res = doQuery(session, "startDate", "rep:facet(facet.mincount=1&date.start=2000-01-01T00:00:00Z&date.end=2002-01-01T00:00:00Z&date.gap=+1MONTH)");
         field = res.getFacetDate("startDate");
 
-        Assert.assertEquals(2, field.getValues().size(), "Query did not return correct number of facets");
+        assertEquals("Query did not return correct number of facets", 2, field.getValues().size());
         
         Iterator<FacetField.Count> counts = field.getValues().iterator();
 
@@ -252,7 +255,7 @@ public class FacetedQueryTest extends AbstractJahiaTest {
         res = doQuery(session, "startDate", "rep:facet(facet.mincount=1&date.start=2000-01-01T00:00:00Z&date.end=2002-01-01T00:00:00Z&date.gap=+1YEAR)");
         field = res.getFacetDate("startDate");
 
-        Assert.assertEquals(1, field.getValues().size(), "Query did not return correct number of facets");
+        assertEquals("Query did not return correct number of facets", 1, field.getValues().size());
         counts = field.getValues().iterator();
 
         checkFacet(counts.next(), "2000-01-01T00:00:00Z", 27);
@@ -265,7 +268,7 @@ public class FacetedQueryTest extends AbstractJahiaTest {
         res = doQuery(session, "startDate", "rep:facet(facet.mincount=1&date.start=2000-01-10T00:00:00Z&date.end=2000-01-31T00:00:00Z&date.gap=+7DAYS&date.include=lower&date.include=upper&date.include=edge&date.other=all)");
         field = res.getFacetDate("startDate");
 
-        Assert.assertEquals(6, field.getValues().size(), "Query did not return correct number of facets");
+        assertEquals("Query did not return correct number of facets", 6, field.getValues().size());
         
         counts = field.getValues().iterator();
 
@@ -282,7 +285,7 @@ public class FacetedQueryTest extends AbstractJahiaTest {
         }
     }
     
-//    @Test    
+    @Test    
     public void testRangeFacets() throws Exception {
 
         JCRSessionWrapper session = JCRSessionFactory.getInstance().getCurrentUserSession(Constants.EDIT_WORKSPACE,
@@ -295,12 +298,12 @@ public class FacetedQueryTest extends AbstractJahiaTest {
         res = doQuery(session, "startDate", "rep:facet(range.start=2000-01-01T00:00:00Z&range.end=2002-01-01T00:00:00Z&range.gap=+1MONTH&range.include=lower&range.include=upper&range.include=edge)");
         field = res.getRangeFacet("startDate");
 
-        Assert.assertEquals(24, field.getCounts().size(), "Query did not return correct number of facets");
+        assertEquals("Query did not return correct number of facets", 24, field.getCounts().size());
         
         res = doQuery(session, "startDate", "rep:facet(facet.mincount=1&range.start=2000-01-01T00:00:00Z&range.end=2002-01-01T00:00:00Z&range.gap=+1MONTH&range.include=lower&range.include=upper&range.include=edge)");
         field = res.getRangeFacet("startDate");
 
-        Assert.assertEquals(2, field.getCounts().size(), "Query did not return correct number of facets");
+        assertEquals("Query did not return correct number of facets", 2, field.getCounts().size());
         
         Iterator<RangeFacet.Count> counts = field.getCounts().iterator();
 
@@ -316,7 +319,7 @@ public class FacetedQueryTest extends AbstractJahiaTest {
         res = doQuery(session, "startDate", "rep:facet(facet.mincount=1&range.start=2000-01-01T00:00:00Z&range.end=2002-01-01T00:00:00Z&range.gap=+1YEAR&range.include=lower&range.include=upper&range.include=edge)");
         field = res.getRangeFacet("startDate");
 
-        Assert.assertEquals(1, field.getCounts().size(), "Query did not return correct number of facets");
+        assertEquals("Query did not return correct number of facets", 1, field.getCounts().size());
         counts = field.getCounts().iterator();
 
         checkFacet(counts.next(), "2000-01-01T00:00:00Z", 27);
@@ -330,7 +333,7 @@ public class FacetedQueryTest extends AbstractJahiaTest {
         res = doQuery(session, "startDate", "rep:facet(facet.mincount=1&range.start=2000-01-10T00:00:00Z&range.end=2000-01-31T00:00:00Z&range.gap=+7DAYS&range.include=lower&range.include=upper&range.include=edge&range.other=all)");
         field = res.getRangeFacet("startDate");
 
-        Assert.assertEquals(6, field.getCounts().size(), "Query did not return correct number of facets");
+        assertEquals("Query did not return correct number of facets", 6, field.getCounts().size());
         
         counts = field.getCounts().iterator();
 
@@ -348,7 +351,7 @@ public class FacetedQueryTest extends AbstractJahiaTest {
         }        
     }    
     
-//    @Test
+    @Test
     public void testI18NFacets() throws Exception {
 
         JCRSessionWrapper session = JCRSessionFactory.getInstance().getCurrentUserSession(Constants.EDIT_WORKSPACE,
@@ -360,9 +363,9 @@ public class FacetedQueryTest extends AbstractJahiaTest {
         // test i18n facets
         res = doQuery(session, "location", "rep:facet(facet.mincount=1)");
         field = res.getFacetField("location");
-        Assert.assertNotNull(field, "Facet field is null");
-        Assert.assertNotNull(field.getValues(), "Facet values are null");
-        Assert.assertEquals(2, field.getValues().size(), "Query did not return correct number of facets");
+        assertNotNull("Facet field is null",field);
+        assertNotNull("Facet values are null",field.getValues());
+        assertEquals("Query did not return correct number of facets", 2, field.getValues().size());
         Iterator<FacetField.Count> counts = field.getValues().iterator();
 
         checkFacet(counts.next(), PARIS, 15);
@@ -378,12 +381,13 @@ public class FacetedQueryTest extends AbstractJahiaTest {
         }        
     }
     
-//    @Test
+    @Test
     public void testCategoryFacets() throws Exception {
-
-        JCRSessionWrapper session = JCRSessionFactory.getInstance().getCurrentUserSession(Constants.EDIT_WORKSPACE,
-                LanguageCodeConverters.languageCodeToLocale(DEFAULT_LANGUAGE));
-
+        JCRSessionWrapper session = JCRSessionFactory.getInstance()
+                .getCurrentUserSession(
+                        Constants.EDIT_WORKSPACE,
+                        LanguageCodeConverters
+                                .languageCodeToLocale(DEFAULT_LANGUAGE));
         if (session.nodeExists("/sites/systemsite")) {
             FacetField field;
             QueryResultWrapper res;
@@ -392,10 +396,10 @@ public class FacetedQueryTest extends AbstractJahiaTest {
             res = doQuery(session, "j:defaultCategory",
                     "rep:facet(facet.mincount=1&nodetype=jmix:categorized)");
             field = res.getFacetField("j:defaultCategory");
-            Assert.assertNotNull(field, "Facet field is null");
-            Assert.assertNotNull(field.getValues(), "Facet values are null");
-            Assert.assertEquals(3, field.getValues().size(),
-                    "Query did not return correct number of facets");
+            assertNotNull("Facet field is null", field);
+            assertNotNull("Facet values are null", field.getValues());
+            assertEquals("Query did not return correct number of facets", 3,
+                    field.getValues().size());
             Iterator<FacetField.Count> counts = field.getValues().iterator();
 
             checkFacet(counts.next(), "1/sites/systemsite/categories/cat3", 16);
@@ -421,7 +425,7 @@ public class FacetedQueryTest extends AbstractJahiaTest {
         }
     }
 
-//    @Test
+    @Test
     public void testMultipleFacets() throws Exception {
 
         JCRSessionWrapper session = JCRSessionFactory.getInstance().getCurrentUserSession(Constants.EDIT_WORKSPACE,
@@ -434,9 +438,9 @@ public class FacetedQueryTest extends AbstractJahiaTest {
         res = doQuery(session, "eventsType", "rep:facet(facet.mincount=1&key=1)", "startDate","rep:facet(facet.mincount=1&date.start=2000-01-01T00:00:00Z&date.end=2000-03-01T00:00:00Z&date.gap=+1MONTH&key=2)");
         checkResultSize(res, 0);
         field = res.getFacetField("eventsType");
-        Assert.assertNotNull(field, "Facet field is null");
-        Assert.assertNotNull(field.getValues(), "Facet values are null");
-        Assert.assertEquals(6 ,field.getValues().size(), "Query did not return correct number of facet value");
+        assertNotNull("Facet field is null",field);
+        assertNotNull("Facet values are null",field.getValues());
+        assertEquals("Query did not return correct number of facet value", 6 ,field.getValues().size());
         Iterator<FacetField.Count> counts = field.getValues().iterator();
 
         checkFacet(counts.next(), SHOW, 7);
@@ -452,9 +456,9 @@ public class FacetedQueryTest extends AbstractJahiaTest {
         }          
 
         field = res.getFacetDate("startDate");
-        Assert.assertNotNull(field, "Facet field is null");
-        Assert.assertNotNull(field.getValues(), "Facet values are null");
-        Assert.assertEquals(2, field.getValues().size(), "Query did not return correct number of facet values");
+        assertNotNull("Facet field is null",field);
+        assertNotNull("Facet values are null",field.getValues());
+        assertEquals("Query did not return correct number of facet values", 2, field.getValues().size());
         counts = field.getValues().iterator();
 
         checkFacet(counts.next(), "2000-01-01T00:00:00Z", 14);
@@ -466,7 +470,7 @@ public class FacetedQueryTest extends AbstractJahiaTest {
             
             FacetField nestedField = resCheck.getFacetDate("startDate");
             
-            Assert.assertNull(nestedField, "Facet field is not null");
+            assertNull("Facet field is not null",nestedField);
             
             nestedField = resCheck.getFacetField("eventsType");
             Iterator<FacetField.Count> nestedCounts = nestedField.getValues().iterator();
@@ -488,7 +492,7 @@ public class FacetedQueryTest extends AbstractJahiaTest {
         }        
     }
 
-//    @Test
+    @Test
     public void testQueryFacets() throws Exception {
 
         JCRSessionWrapper session = JCRSessionFactory.getInstance().getCurrentUserSession(Constants.EDIT_WORKSPACE,
@@ -497,11 +501,11 @@ public class FacetedQueryTest extends AbstractJahiaTest {
         // test i18n facets
         QueryResultWrapper res = doQuery(session, "eventsType", "rep:facet(facet.query=0\\:FACET\\:eventsType:[a TO p]&facet.query=0\\:FACET\\:eventsType:[p TO z])");
         Map<String,Long> queryFacet = res.getFacetQuery();
-        Assert.assertNotNull(queryFacet, "Query facet result is null");
-        Assert.assertEquals(2, queryFacet.size(), "Query did not return correct number of facets");
+        assertNotNull("Query facet result is null",queryFacet);
+        assertEquals("Query did not return correct number of facets", 2, queryFacet.size());
 
-        Assert.assertEquals(10, queryFacet.get("0\\:FACET\\:eventsType:[a TO p]").longValue(), "Facet count is incorrect");
-        Assert.assertEquals(17, queryFacet.get("0\\:FACET\\:eventsType:[p TO z]").longValue(), "Facet count is incorrect");
+        assertEquals("Facet count is incorrect", 10, queryFacet.get("0\\:FACET\\:eventsType:[a TO p]").longValue());
+        assertEquals("Facet count is incorrect", 17, queryFacet.get("0\\:FACET\\:eventsType:[p TO z]").longValue());
         
         
         QueryResultWrapper resCheck = doQuery(session, "rep:filter()", "0\\:FACET\\:eventsType:[a TO p]");
@@ -511,11 +515,11 @@ public class FacetedQueryTest extends AbstractJahiaTest {
 
         res = doQuery(session, "startDate", "rep:facet(facet.query=0\\:FACET\\:startDate:[2000-01-01T00:00:00Z TO 2000-01-01T00:00:00Z+1MONTH]&facet.query=0\\:FACET\\:startDate:[2000-01-01T00:00:00Z+1MONTH TO 2000-01-01T00:00:00Z+2MONTH])");
         queryFacet = res.getFacetQuery();
-        Assert.assertNotNull(queryFacet, "Query facet result is null");
-        Assert.assertEquals(2, queryFacet.size(), "Query did not return correct number of facets");
+        assertNotNull("Query facet result is null",queryFacet);
+        assertEquals("Query did not return correct number of facets", 2, queryFacet.size());
         
-        Assert.assertEquals(14, queryFacet.get("0\\:FACET\\:startDate:[2000-01-01T00:00:00Z TO 2000-01-01T00:00:00Z+1MONTH]").longValue(), "Facet count is incorrect");
-        Assert.assertEquals(13, queryFacet.get("0\\:FACET\\:startDate:[2000-01-01T00:00:00Z+1MONTH TO 2000-01-01T00:00:00Z+2MONTH]").longValue(), "Facet count is incorrect");        
+        assertEquals("Facet count is incorrect", 14, queryFacet.get("0\\:FACET\\:startDate:[2000-01-01T00:00:00Z TO 2000-01-01T00:00:00Z+1MONTH]").longValue());
+        assertEquals("Facet count is incorrect", 13, queryFacet.get("0\\:FACET\\:startDate:[2000-01-01T00:00:00Z+1MONTH TO 2000-01-01T00:00:00Z+2MONTH]").longValue());        
         
         resCheck = doQuery(session, "rep:filter()", "0\\:FACET\\:startDate:[2000-01-01T00:00:00Z TO 2000-01-01T00:00:00Z+1MONTH]");
         checkResultSize(resCheck, 14);
@@ -523,7 +527,7 @@ public class FacetedQueryTest extends AbstractJahiaTest {
         checkResultSize(resCheck, 13);        
     }
 
-    private static void initContent(JCRSessionWrapper session) throws RepositoryException, IOException {
+    private static void initContent(JCRSessionWrapper session) throws RepositoryException {
         int i = 0;
         Calendar calendar = new GregorianCalendar(2000, 0, 1, 12, 0);
         JCRNodeWrapper cat1 = null;
@@ -634,22 +638,24 @@ public class FacetedQueryTest extends AbstractJahiaTest {
         while (ni.hasNext()) {
             results.add((JCRNodeWrapper) ni.next());
         }
-        Assert.assertEquals(expected, results.size());
+        assertEquals("", expected, results.size());
     }
 
     private void checkFacet(FacetField.Count c, final String name, final int count) {
-        Assert.assertEquals(name, c.getName(), "Facet are not correctly ordered or has incorrect name");
-        Assert.assertEquals(count, c.getCount(), "Facet count is incorrect");
+        assertEquals("Facet are not correctly ordered or has incorrect name", name, c.getName());
+        assertEquals("Facet count is incorrect", count, c.getCount());
     }
     
-    private void checkFacet(RangeFacet.Count c, final String name, final int count) {
-        Assert.assertEquals(name, c.getValue(), "Facet are not correctly ordered or has incorrect name");
-        Assert.assertEquals(count, c.getCount(), "Facet count is incorrect");
-    }    
+    private void checkFacet(RangeFacet.Count c, final String name,
+            final int count) {
+        assertEquals("Facet are not correctly ordered or has incorrect name",
+                name, c.getValue());
+        assertEquals("Facet count is incorrect", count, c.getCount());
+    }
 
-    private static void createEvent(JCRNodeWrapper node, final String eventType, String location, Calendar calendar,
-                             JCRNodeWrapper category, int i)
-            throws RepositoryException {
+    private static void createEvent(JCRNodeWrapper node,
+            final String eventType, String location, Calendar calendar,
+            JCRNodeWrapper category, int i) throws RepositoryException {
         final String name = eventType + i;
         final JCRNodeWrapper event = node.addNode(name, "jnt:event");
         event.setProperty("jcr:title", name);
@@ -657,7 +663,11 @@ public class FacetedQueryTest extends AbstractJahiaTest {
         event.setProperty("location", location);
         event.setProperty("startDate", calendar);
         event.addMixin("jmix:categorized");
-        event.setProperty("j:defaultCategory", new Value[] {event.getSession().getValueFactory().createValue(category)} );
+        if (category != null) {
+            event.setProperty("j:defaultCategory", new Value[] { event
+                    .getSession().getValueFactory().createValue(category) });
+        }
+        
     }
 
 
