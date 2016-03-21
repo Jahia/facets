@@ -47,6 +47,6 @@ orderable
 - gap (string) mandatory indexed=no
 - hardend (boolean) = false indexed=no
 - other (string, choicelist[resourceBundle]) multiple indexed=no < before,after,between,none,all
-- include (string, choicelist[resourceBundle]) multiple indexed=no < lower,upper,edge,outer,all
+- include (string, choicelist[resourceBundle])='lower','upper' multiple indexed=no < lower,upper,edge,outer,all
 - labelFormat (string) indexed=no
 - valueLabel (string) i18n indexed=no

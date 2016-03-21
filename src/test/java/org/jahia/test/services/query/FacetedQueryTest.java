@@ -256,9 +256,17 @@ public class FacetedQueryTest extends AbstractJUnitTest {
             checkResultSize(resCheck, (int) count.getCount());
         }
     }
+    @Test    
+    public void testDateRangeFacets() throws Exception {
+        testDateRangeFacets("startDate");
+    }
     
     @Test    
-    public void testRangeFacets() throws Exception {
+    public void testJRDateRangeFacets() throws Exception {
+        testDateRangeFacets("startJRDate");
+    }
+    
+    protected void testDateRangeFacets(String fieldName) throws Exception {
 
         JCRSessionWrapper session = JCRSessionFactory.getInstance().getCurrentUserSession(Constants.EDIT_WORKSPACE,
                 LanguageCodeConverters.languageCodeToLocale(DEFAULT_LANGUAGE));
@@ -267,13 +275,13 @@ public class FacetedQueryTest extends AbstractJUnitTest {
         QueryResultWrapper res;
 
         // test date facets
-        res = doQuery(session, "startDate", "rep:facet(range.start=2000-01-01T00:00:00Z&range.end=2002-01-01T00:00:00Z&range.gap=+1MONTH&range.include=lower&range.include=upper&range.include=edge)");
-        field = res.getRangeFacet("startDate");
+        res = doQuery(session, fieldName, "rep:facet(range.start=2000-01-01T00:00:00Z&range.end=2002-01-01T00:00:00Z&range.gap=+1MONTH&range.include=lower&range.include=upper&range.include=edge)");
+        field = res.getRangeFacet(fieldName);
 
         assertEquals("Query did not return correct number of facets", 24, field.getCounts().size());
         
-        res = doQuery(session, "startDate", "rep:facet(facet.mincount=1&range.start=2000-01-01T00:00:00Z&range.end=2002-01-01T00:00:00Z&range.gap=+1MONTH&range.include=lower&range.include=upper&range.include=edge)");
-        field = res.getRangeFacet("startDate");
+        res = doQuery(session, fieldName, "rep:facet(facet.mincount=1&range.start=2000-01-01T00:00:00Z&range.end=2002-01-01T00:00:00Z&range.gap=+1MONTH&range.include=lower&range.include=upper&range.include=edge)");
+        field = res.getRangeFacet(fieldName);
 
         assertEquals("Query did not return correct number of facets", 2, field.getCounts().size());
         
@@ -284,12 +292,12 @@ public class FacetedQueryTest extends AbstractJUnitTest {
         
         for (Iterator<RangeFacet.Count> it = field.getCounts().iterator(); it.hasNext();) {
             RangeFacet.Count count = it.next();
-            QueryResultWrapper resCheck = doQuery(session, "rep:filter(startDate)", count.getAsFilterQuery());
+            QueryResultWrapper resCheck = doQuery(session, "rep:filter(" + fieldName + ")", count.getAsFilterQuery());
             checkResultSize(resCheck, (int) count.getCount());
         }
 
-        res = doQuery(session, "startDate", "rep:facet(facet.mincount=1&range.start=2000-01-01T00:00:00Z&range.end=2002-01-01T00:00:00Z&range.gap=+1YEAR&range.include=lower&range.include=upper&range.include=edge)");
-        field = res.getRangeFacet("startDate");
+        res = doQuery(session, fieldName, "rep:facet(facet.mincount=1&range.start=2000-01-01T00:00:00Z&range.end=2002-01-01T00:00:00Z&range.gap=+1YEAR&range.include=lower&range.include=upper&range.include=edge)");
+        field = res.getRangeFacet(fieldName);
 
         assertEquals("Query did not return correct number of facets", 1, field.getCounts().size());
         counts = field.getCounts().iterator();
@@ -298,12 +306,12 @@ public class FacetedQueryTest extends AbstractJUnitTest {
         
         for (Iterator<RangeFacet.Count> it = field.getCounts().iterator(); it.hasNext();) {
             RangeFacet.Count count = it.next();
-            QueryResultWrapper resCheck = doQuery(session, "rep:filter(startDate)", count.getAsFilterQuery());
+            QueryResultWrapper resCheck = doQuery(session, "rep:filter(" + fieldName +")", count.getAsFilterQuery());
             checkResultSize(resCheck, (int) count.getCount());
         }
         
-        res = doQuery(session, "startDate", "rep:facet(facet.mincount=1&range.start=2000-01-10T00:00:00Z&range.end=2000-01-31T00:00:00Z&range.gap=+7DAYS&range.include=lower&range.include=upper&range.include=edge&range.other=all)");
-        field = res.getRangeFacet("startDate");
+        res = doQuery(session, fieldName, "rep:facet(facet.mincount=1&range.start=2000-01-10T00:00:00Z&range.end=2000-01-31T00:00:00Z&range.gap=+7DAYS&range.include=lower&range.include=upper&range.include=edge&range.other=all)");
+        field = res.getRangeFacet(fieldName);
 
         assertEquals("Query did not return correct number of facets", 6, field.getCounts().size());
         
@@ -318,10 +326,86 @@ public class FacetedQueryTest extends AbstractJUnitTest {
         
         for (Iterator<RangeFacet.Count> it = field.getCounts().iterator(); it.hasNext();) {
             RangeFacet.Count count = it.next();
-            QueryResultWrapper resCheck = doQuery(session, "rep:filter(startDate)", count.getAsFilterQuery());
+            QueryResultWrapper resCheck = doQuery(session, "rep:filter(" + fieldName + ")", count.getAsFilterQuery());
             checkResultSize(resCheck, (int) count.getCount());
         }        
     }    
+    
+    @Test    
+    public void testRangeFacets() throws Exception {
+
+        JCRSessionWrapper session = JCRSessionFactory.getInstance().getCurrentUserSession(Constants.EDIT_WORKSPACE,
+                LanguageCodeConverters.languageCodeToLocale(DEFAULT_LANGUAGE));
+
+        RangeFacet field;
+        QueryResultWrapper res;
+
+        // test range facets
+        res = doQuery(session, "ticketprice",
+                "rep:facet(range.start=0&range.end=500&range.gap=+10&range.include=lower&range.include=upper&range.include=edge&key=1)",
+                "expectedattendance",
+                "rep:facet(range.start=0&range.end=500&range.gap=+10&range.include=lower&range.include=upper&range.include=edge&key=2)",
+                "parkingplaces",
+                "rep:facet(range.start=0&range.end=500&range.gap=+10&range.include=lower&range.include=upper&range.include=edge&key=3)");
+        field = res.getRangeFacet("ticketprice");
+        assertEquals("Query did not return correct number of facets", 50, field.getCounts().size());
+        field = res.getRangeFacet("expectedattendance");
+        assertEquals("Query did not return correct number of facets", 50, field.getCounts().size());
+        field = res.getRangeFacet("parkingplaces");
+        assertEquals("Query did not return correct number of facets", 50, field.getCounts().size());        
+        
+        res = doQuery(session, "ticketprice",
+                "rep:facet(facet.mincount=1&range.start=0&range.end=500&range.gap=+10&range.include=lower&range.include=upper&range.include=edge&key=1)",
+                "expectedattendance",
+                "rep:facet(facet.mincount=1&range.start=0&range.end=500&range.gap=+10&range.include=lower&range.include=upper&range.include=edge&key=2)",
+                "parkingplaces",
+                "rep:facet(facet.mincount=1&range.start=0&range.end=500&range.gap=+10&range.include=lower&range.include=upper&range.include=edge&key=3)");
+        
+        checkRangeFacet(session, res.getRangeFacet("ticketprice"), 11, "0.0", "5", "10.0", "4", "20.0", "8", "30.0", "2", "90.0", "1", "100.0", "2", "110.0", "3", "120.0", "1", "210.0", "1", "310.0", "1", "410.0", "1");
+        checkRangeFacet(session, res.getRangeFacet("expectedattendance"), 11, "0", "5", "10", "4", "20", "8", "30", "2", "90", "1", "100", "2", "110", "3", "120", "1", "210", "1", "310", "1", "410", "1");
+        checkRangeFacet(session, res.getRangeFacet("parkingplaces"), 11, "0", "5", "10", "4", "20", "8", "30", "2", "90", "1", "100", "2", "110", "3", "120", "1", "210", "1", "310", "1", "410", "1");
+
+        res = doQuery(session, "ticketprice",
+                "rep:facet(facet.mincount=1&range.start=0&range.end=500&range.gap=+100&range.include=lower&range.include=upper&range.include=edge&key=1)",
+                "expectedattendance",
+                "rep:facet(facet.mincount=1&range.start=0&range.end=500&range.gap=+100&range.include=lower&range.include=upper&range.include=edge&key=2)",
+                "parkingplaces",
+                "rep:facet(facet.mincount=1&range.start=0&range.end=500&range.gap=+100&range.include=lower&range.include=upper&range.include=edge&key=3)");        
+        
+        checkRangeFacet(session, res.getRangeFacet("ticketprice"), 5, "0.0", "16", "100.0", "5", "200.0", "1", "300.0", "1", "400.0", "1");
+        checkRangeFacet(session, res.getRangeFacet("expectedattendance"), 5, "0", "16", "100", "5", "200", "1", "300", "1", "400", "1");        
+        checkRangeFacet(session, res.getRangeFacet("parkingplaces"), 5, "0", "16", "100", "5", "200", "1", "300", "1", "400", "1");        
+
+        res = doQuery(session, "ticketprice",
+                "rep:facet(facet.mincount=1&range.start=10&range.end=200&range.gap=+20&range.include=lower&range.include=upper&range.include=edge&range.other=all&key=1)",
+                "expectedattendance",
+                "rep:facet(facet.mincount=1&range.start=10&range.end=200&range.gap=+20&range.include=lower&range.include=upper&range.include=edge&range.other=all&key=2)",
+                "parkingplaces",
+                "rep:facet(facet.mincount=1&range.start=10&range.end=200&range.gap=+20&range.include=lower&range.include=upper&range.include=edge&range.other=all&key=3)");        
+                
+        checkRangeFacet(session, res.getRangeFacet("ticketprice"), 7, "10.0", "11", "30.0", "2", "90.0", "2", "110.0", "4", "before", "4", "after", "7", "between", "16");
+        checkRangeFacet(session, res.getRangeFacet("expectedattendance"), 7, "10", "11", "30", "2", "90", "2", "110", "4", "before", "4", "after", "7", "between", "16");        
+        checkRangeFacet(session, res.getRangeFacet("parkingplaces"), 7, "10", "11", "30", "2", "90", "2", "110", "4", "before", "4", "after", "7", "between", "16");                
+    }    
+
+    private void checkRangeFacet(JCRSessionWrapper session, RangeFacet field, int expectedCounts, final String... valueCount)
+            throws RepositoryException {
+        assertEquals("Query did not return correct number of facets", expectedCounts, field.getCounts().size());
+
+        Iterator<RangeFacet.Count> counts = field.getCounts().iterator();
+
+        for (int i = 0; i < valueCount.length; i++) {
+            String value = valueCount[i++];
+            int count = Integer.valueOf(valueCount[i]);
+            checkFacet(counts.next(), value, count);
+        }
+
+        for (Iterator<RangeFacet.Count> it = field.getCounts().iterator(); it.hasNext();) {
+            RangeFacet.Count count = it.next();
+            QueryResultWrapper resCheck = doQuery(session, "rep:filter(" + field.getName() + ")", count.getAsFilterQuery());
+            checkResultSize(resCheck, (int) count.getCount());
+        }
+    }
     
     @Test
     public void testI18NFacets() throws Exception {
@@ -517,41 +601,41 @@ public class FacetedQueryTest extends AbstractJUnitTest {
         }
         JCRNodeWrapper node = session.getNode("/sites/jcrFacetTest/contents");
         session.getWorkspace().getVersionManager().checkout(node.getPath());        
-        createEvent(node, MEETING, PARIS, calendar, cat1, i++);
-        createEvent(node, MEETING, GENEVA, calendar, cat1, i++);
+        createEvent(node, MEETING, PARIS, calendar, cat1, i++, 10.0, 10, 10);
+        createEvent(node, MEETING, GENEVA, calendar, cat1, i++, 15.0, 15, 15);
         calendar.add(Calendar.DAY_OF_MONTH, 5);
-        createEvent(node, CONSUMER_SHOW, PARIS, calendar, cat1, i++);
-        createEvent(node, CONSUMER_SHOW, PARIS, calendar, cat1, i++);
+        createEvent(node, CONSUMER_SHOW, PARIS, calendar, cat1, i++, 20.0, 20, 20);
+        createEvent(node, CONSUMER_SHOW, PARIS, calendar, cat1, i++, 25.0, 25, 25);
         calendar.add(Calendar.DAY_OF_MONTH, 5);
-        createEvent(node, CONSUMER_SHOW, GENEVA, calendar, cat1, i++);
-        createEvent(node, ROAD_SHOW, PARIS, calendar, cat2, i++);
+        createEvent(node, CONSUMER_SHOW, GENEVA, calendar, cat1, i++, 26.5, 26, 26);
+        createEvent(node, ROAD_SHOW, PARIS, calendar, cat2, i++, 27.7, 27, 27);
         calendar.add(Calendar.DAY_OF_MONTH, 5);
-        createEvent(node, ROAD_SHOW, PARIS, calendar, cat2, i++);
-        createEvent(node, ROAD_SHOW, GENEVA, calendar, cat2, i++);
+        createEvent(node, ROAD_SHOW, PARIS, calendar, cat2, i++, 30.0, 30, 30);
+        createEvent(node, ROAD_SHOW, GENEVA, calendar, cat2, i++, 30.0, 30, 30);
         calendar.add(Calendar.DAY_OF_MONTH, 5);
-        createEvent(node, ROAD_SHOW, GENEVA, calendar, cat2, i++);
-        createEvent(node, CONFERENCE, PARIS, calendar, cat2, i++);
+        createEvent(node, ROAD_SHOW, GENEVA, calendar, cat2, i++, 3.0, 3, 3);
+        createEvent(node, CONFERENCE, PARIS, calendar, cat2, i++, 4.0, 4, 4);
         calendar.add(Calendar.DAY_OF_MONTH, 5);
-        createEvent(node, CONFERENCE, PARIS, calendar, cat2, i++);
-        createEvent(node, CONFERENCE, PARIS, calendar, cat3, i++);
+        createEvent(node, CONFERENCE, PARIS, calendar, cat2, i++, 0.5, 1, 1);
+        createEvent(node, CONFERENCE, PARIS, calendar, cat3, i++, 0.0, 0, 0);
         calendar.add(Calendar.DAY_OF_MONTH, 5);
-        createEvent(node, CONFERENCE, GENEVA, calendar, cat3, i++);
-        createEvent(node, CONFERENCE, GENEVA, calendar, cat3, i++);
+        createEvent(node, CONFERENCE, GENEVA, calendar, cat3, i++, 100.0, 100, 100);
+        createEvent(node, CONFERENCE, GENEVA, calendar, cat3, i++, 110.0, 110, 110);
         calendar.add(Calendar.DAY_OF_MONTH, 5);
-        createEvent(node, SHOW, PARIS, calendar, cat3, i++);
-        createEvent(node, SHOW, PARIS, calendar, cat3, i++);
+        createEvent(node, SHOW, PARIS, calendar, cat3, i++, 111.1, 111, 111);
+        createEvent(node, SHOW, PARIS, calendar, cat3, i++, 1111.1, 1111, 1111);
         calendar.add(Calendar.DAY_OF_MONTH, 5);
-        createEvent(node, SHOW, PARIS, calendar, cat3, i++);
-        createEvent(node, SHOW, GENEVA, calendar, cat3, i++);
-        createEvent(node, SHOW, GENEVA, calendar, cat3, i++);
-        createEvent(node, SHOW, GENEVA, calendar, cat3, i++);
-        createEvent(node, SHOW, GENEVA, calendar, cat3, i++);
-        createEvent(node, PRESS_CONFERENCE, PARIS, calendar, cat3, i++);
-        createEvent(node, PRESS_CONFERENCE, PARIS, calendar, cat3, i++);
-        createEvent(node, PRESS_CONFERENCE, PARIS, calendar, cat3, i++);
-        createEvent(node, PRESS_CONFERENCE, PARIS, calendar, cat3, i++);
-        createEvent(node, PRESS_CONFERENCE, GENEVA, calendar, cat3, i++);
-        createEvent(node, PRESS_CONFERENCE, GENEVA, calendar, cat3, i++);
+        createEvent(node, SHOW, PARIS, calendar, cat3, i++, 121.1, 121, 121);
+        createEvent(node, SHOW, GENEVA, calendar, cat3, i++, 12.1, 12, 12);
+        createEvent(node, SHOW, GENEVA, calendar, cat3, i++, 20.1, 21, 21);
+        createEvent(node, SHOW, GENEVA, calendar, cat3, i++, 20.9, 21, 21);
+        createEvent(node, SHOW, GENEVA, calendar, cat3, i++, 10000.0, 10000, 10000);
+        createEvent(node, PRESS_CONFERENCE, PARIS, calendar, cat3, i++, 1000000000.0, 1000000000L, 1000000000L);
+        createEvent(node, PRESS_CONFERENCE, PARIS, calendar, cat3, i++, 411.1, 411, 411);
+        createEvent(node, PRESS_CONFERENCE, PARIS, calendar, cat3, i++, 311.1, 311, 311);
+        createEvent(node, PRESS_CONFERENCE, PARIS, calendar, cat3, i++, 211.1, 211, 211);
+        createEvent(node, PRESS_CONFERENCE, GENEVA, calendar, cat3, i++, 111.1, 111, 111);
+        createEvent(node, PRESS_CONFERENCE, GENEVA, calendar, cat3, i++, 511.1, 511, 511);
 
         session.save();
     }
@@ -627,13 +711,17 @@ public class FacetedQueryTest extends AbstractJUnitTest {
 
     private static void createEvent(JCRNodeWrapper node,
             final String eventType, String location, Calendar calendar,
-            JCRNodeWrapper category, int i) throws RepositoryException {
+            JCRNodeWrapper category, int i, double ticketPrice, long expectedAttendance, long parkingPlaces) throws RepositoryException {
         final String name = eventType + i;
         final JCRNodeWrapper event = node.addNode(name, "jnt:event");
         event.setProperty("jcr:title", name);
         event.setProperty("eventsType", eventType);
         event.setProperty("location", location);
         event.setProperty("startDate", calendar);
+        event.setProperty("startJRDate", calendar);        
+        event.setProperty("ticketprice", ticketPrice);
+        event.setProperty("expectedattendance", expectedAttendance);
+        event.setProperty("parkingplaces", parkingPlaces);        
         event.addMixin("jmix:categorized");
         if (category != null) {
             event.setProperty("j:defaultCategory", new Value[] { event

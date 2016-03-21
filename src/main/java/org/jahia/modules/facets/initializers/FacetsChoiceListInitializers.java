@@ -44,7 +44,6 @@
 package org.jahia.modules.facets.initializers;
 
 import org.slf4j.Logger;
-import org.drools.core.util.StringUtils;
 import org.jahia.services.content.JCRNodeWrapper;
 import org.jahia.services.content.nodetypes.ExtendedNodeType;
 import org.jahia.services.content.nodetypes.ExtendedPropertyDefinition;
@@ -105,46 +104,45 @@ public class FacetsChoiceListInitializers implements ModuleChoiceListInitializer
     private List<ExtendedPropertyDefinition> getPropertyDefinitions(String param,
             Map<String, Object> context)
             throws RepositoryException {
-        List<ExtendedPropertyDefinition> propDefs = null;
-        if (StringUtils.isEmpty(param)) {
-            JCRNodeWrapper parentNode = (JCRNodeWrapper) context
-                    .get("contextParent");
-            if (parentNode == null) {
-                JCRNodeWrapper nodeWrapper = (JCRNodeWrapper) context
-                        .get("contextNode");
-                if (nodeWrapper != null) {
-                    parentNode = nodeWrapper.getParent();
-                }
+        
+        boolean hierarchical = param.contains("hierarchical");
+        int requiredType = param.contains("date") ? PropertyType.DATE
+                : PropertyType.UNDEFINED;  
+        
+        List<ExtendedPropertyDefinition> propDefs = new ArrayList<ExtendedPropertyDefinition>();
+        
+        JCRNodeWrapper parentNode = (JCRNodeWrapper) context.get("contextParent");
+        if (parentNode == null) {
+            JCRNodeWrapper nodeWrapper = (JCRNodeWrapper) context.get("contextNode");
+            if (nodeWrapper != null) {
+                parentNode = nodeWrapper.getParent();
             }
+        }
 
-            if (parentNode != null
-                    && parentNode.hasProperty("j:bindedComponent")) {
-                JCRNodeWrapper boundNode = (JCRNodeWrapper) parentNode
-                        .getProperty("j:bindedComponent").getNode();
-                if (boundNode.hasProperty("j:allowedTypes")) {
-                    final Value[] values1 = boundNode.getProperty(
-                            "j:allowedTypes").getValues();
-                    ExtendedPropertyDefinition[] propertyDefs = ComponentLinkerChoiceListInitializer
-                            .getCommonChildNodeDefinitions(values1, true, true,
-                                    new LinkedHashSet<String>());
-                    propDefs = Arrays.asList(propertyDefs);
+        if (parentNode != null && parentNode.hasProperty("j:bindedComponent")) {
+            JCRNodeWrapper boundNode = (JCRNodeWrapper) parentNode.getProperty("j:bindedComponent").getNode();
+            if (boundNode.hasProperty("j:allowedTypes")) {
+                final Value[] values1 = boundNode.getProperty("j:allowedTypes").getValues();
+                ExtendedPropertyDefinition[] propertyDefs = ComponentLinkerChoiceListInitializer.getCommonChildNodeDefinitions(values1,
+                        true, true, new LinkedHashSet<String>());
+                for (ExtendedPropertyDefinition def : propertyDefs) {
+                    if ((!hierarchical || def.isHierarchical())
+                            && (requiredType == PropertyType.UNDEFINED || def
+                                    .getRequiredType() == requiredType)) {
+                        propDefs.add(def);
+                    }                    
                 }
             }
         }
-        if (propDefs == null || propDefs.isEmpty()) {
-            propDefs = new ArrayList<ExtendedPropertyDefinition>();
-            boolean hierarchical = param.contains("hierarchical");
-            int requiredType = param.contains("date") ? PropertyType.DATE
-                    : PropertyType.UNDEFINED;
 
+        if (propDefs.isEmpty()) {
             NodeTypeIterator ntr = NodeTypeRegistry.getInstance()
                     .getAllNodeTypes();
             while (ntr.hasNext()) {
                 ExtendedNodeType nt = (ExtendedNodeType) ntr.nextNodeType();
                 for (PropertyDefinition def : nt.getPropertyDefinitions()) {
                     ExtendedPropertyDefinition ep = (ExtendedPropertyDefinition) def;
-                    if (ep.isFacetable()
-                            && (!hierarchical || ep.isHierarchical())
+                    if ((!hierarchical || ep.isHierarchical())
                             && (requiredType == PropertyType.UNDEFINED || ep
                                     .getRequiredType() == requiredType)) {
                         propDefs.add(ep);

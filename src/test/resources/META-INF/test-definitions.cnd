@@ -5,9 +5,10 @@
 [jnt:event] > jnt:content, jmix:editorialContent, mix:title, jmix:structuredContent
  - startDate (date) facetable
  - endDate (date) facetable
+ - startJRDate (date) 
  - location (string) i18n facetable
  - eventsType (string, choicelist[resourceBundle]) facetable  < meeting,consumerShow,roadShow,conference,show,pressConference
  - body (string, richtext) i18n
- - ticketprice (double) facetable
+ - ticketprice (double)
  - expectedattendance (long) facetable
- - parkingplaces (long) facetable
+ - parkingplaces (long) 
