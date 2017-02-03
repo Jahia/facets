@@ -46,12 +46,12 @@
     <facet:setupQueryAndMetadata var="listQuery" boundComponent="${boundComponent}" existingQuery="${moduleMap.listQuery}"
                                  activeFacets="${activeFacetsVars[activeFacetMapVarName]}"/>
     <jcr:jqom var="result" qomBeanName="listQuery" scope="request"/>
+    <c:if test="${!empty activeFacetsVars[activeFacetMapVarName]}">
+        <div class="facets">
+            <%@include file="activeFacets.jspf" %>
+        </div>
+    </c:if>
     <c:if test="${(result.facetFields[0].valueCount gt 0)}">
-        <c:if test="${!empty activeFacetsVars[activeFacetMapVarName]}">
-            <div class="facets">
-                <%@include file="activeFacets.jspf" %>
-            </div>
-        </c:if>
         <h3><c:if
                 test="${not empty currentNode.properties['jcr:title'] && not empty currentNode.properties['jcr:title'].string}"
                 var="titleProvided">${fn:escapeXml(currentNode.properties['jcr:title'].string)}</c:if><c:if
