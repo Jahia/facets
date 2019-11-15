@@ -109,7 +109,7 @@ public class FacetsChoiceListInitializers implements ModuleChoiceListInitializer
         int requiredType = param.contains("date") ? PropertyType.DATE
                 : PropertyType.UNDEFINED;  
         
-        List<ExtendedPropertyDefinition> propDefs = new ArrayList<ExtendedPropertyDefinition>();
+        List<ExtendedPropertyDefinition> propertyDefinitions = new ArrayList<ExtendedPropertyDefinition>();
         
         JCRNodeWrapper parentNode = (JCRNodeWrapper) context.get("contextParent");
         if (parentNode == null) {
@@ -120,47 +120,44 @@ public class FacetsChoiceListInitializers implements ModuleChoiceListInitializer
         }
 
         if (parentNode != null && parentNode.hasProperty("j:type")) {
-            Value[] values1 = new Value[] { parentNode.getProperty("j:type").getValue() };
-            ExtendedPropertyDefinition[] propertyDefs = ComponentLinkerChoiceListInitializer.getCommonChildNodeDefinitions(values1,
-                    true, true, new LinkedHashSet<String>());
-            for (ExtendedPropertyDefinition def : propertyDefs) {
-                if ((!hierarchical || def.isHierarchical())
-                        && (requiredType == PropertyType.UNDEFINED || def
-                        .getRequiredType() == requiredType) && !def.isHidden() ) {
-                    propDefs.add(def);
-                }
-            }
+            Value[] targetNodeTypeValues = new Value[] { parentNode.getProperty("j:type").getValue() };
+            propertyDefinitions.addAll(getPropertiesForTypes(hierarchical, requiredType, targetNodeTypeValues));
         } else if (parentNode != null && parentNode.hasProperty("j:bindedComponent")) {
             JCRNodeWrapper boundNode = (JCRNodeWrapper) parentNode.getProperty("j:bindedComponent").getNode();
             if (boundNode.hasProperty("j:allowedTypes")) {
-                final Value[] values1 = boundNode.getProperty("j:allowedTypes").getValues();
-                ExtendedPropertyDefinition[] propertyDefs = ComponentLinkerChoiceListInitializer.getCommonChildNodeDefinitions(values1,
-                        true, true, new LinkedHashSet<String>());
-                for (ExtendedPropertyDefinition def : propertyDefs) {
-                    if ((!hierarchical || def.isHierarchical())
-                            && (requiredType == PropertyType.UNDEFINED || def
-                                    .getRequiredType() == requiredType) && !def.isHidden() ) {
-                        propDefs.add(def);
-                    }                    
-                }
+                final Value[] allowedNodeTypeValues = boundNode.getProperty("j:allowedTypes").getValues();
+                propertyDefinitions.addAll(getPropertiesForTypes(hierarchical, requiredType, allowedNodeTypeValues));
             }
         }
 
-        if (propDefs.isEmpty()) {
-            NodeTypeIterator ntr = NodeTypeRegistry.getInstance()
+        if (propertyDefinitions.isEmpty()) {
+            NodeTypeIterator nodeTypeIterator = NodeTypeRegistry.getInstance()
                     .getAllNodeTypes();
-            while (ntr.hasNext()) {
-                ExtendedNodeType nt = (ExtendedNodeType) ntr.nextNodeType();
-                for (PropertyDefinition def : nt.getPropertyDefinitions()) {
-                    ExtendedPropertyDefinition ep = (ExtendedPropertyDefinition) def;
-                    if ((!hierarchical || ep.isHierarchical())
-                            && (requiredType == PropertyType.UNDEFINED || ep
-                                    .getRequiredType() == requiredType) && !ep.isHidden()) {
-                        propDefs.add(ep);
-                    }
-                }
+            while (nodeTypeIterator.hasNext()) {
+                ExtendedNodeType nodeType = (ExtendedNodeType) nodeTypeIterator.nextNodeType();
+                propertyDefinitions.addAll(getPropertiesForType(hierarchical, requiredType, nodeType.getPropertyDefinitions()));
             }
         }
-        return propDefs;
+        return propertyDefinitions;
     }
+
+    private List<ExtendedPropertyDefinition> getPropertiesForTypes(boolean hierarchical, int requiredType, Value[] nodeTypeNameValues) throws RepositoryException {
+        ExtendedPropertyDefinition[] propertyDefinitions = ComponentLinkerChoiceListInitializer.getCommonChildNodeDefinitions(nodeTypeNameValues,
+                true, true, new LinkedHashSet<String>());
+        return getPropertiesForType(hierarchical, requiredType, propertyDefinitions);
+    }
+
+    private List<ExtendedPropertyDefinition> getPropertiesForType(boolean hierarchical, int requiredType, ExtendedPropertyDefinition[] propertyDefinitions) {
+        List<ExtendedPropertyDefinition> filteredPropertyDefinitions = new ArrayList<>();
+        for (ExtendedPropertyDefinition propertyDefinition : propertyDefinitions) {
+            if ((!hierarchical || propertyDefinition.isHierarchical())
+                    && (requiredType == PropertyType.UNDEFINED || propertyDefinition
+                    .getRequiredType() == requiredType) && !propertyDefinition.isHidden()) {
+                filteredPropertyDefinitions.add(propertyDefinition);
+            }
+        }
+        return filteredPropertyDefinitions;
+    }
+
+
 }
