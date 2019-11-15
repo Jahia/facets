@@ -119,7 +119,18 @@ public class FacetsChoiceListInitializers implements ModuleChoiceListInitializer
             }
         }
 
-        if (parentNode != null && parentNode.hasProperty("j:bindedComponent")) {
+        if (parentNode != null && parentNode.hasProperty("j:type")) {
+            Value[] values1 = new Value[] { parentNode.getProperty("j:type").getValue() };
+            ExtendedPropertyDefinition[] propertyDefs = ComponentLinkerChoiceListInitializer.getCommonChildNodeDefinitions(values1,
+                    true, true, new LinkedHashSet<String>());
+            for (ExtendedPropertyDefinition def : propertyDefs) {
+                if ((!hierarchical || def.isHierarchical())
+                        && (requiredType == PropertyType.UNDEFINED || def
+                        .getRequiredType() == requiredType) && !def.isHidden() ) {
+                    propDefs.add(def);
+                }
+            }
+        } else if (parentNode != null && parentNode.hasProperty("j:bindedComponent")) {
             JCRNodeWrapper boundNode = (JCRNodeWrapper) parentNode.getProperty("j:bindedComponent").getNode();
             if (boundNode.hasProperty("j:allowedTypes")) {
                 final Value[] values1 = boundNode.getProperty("j:allowedTypes").getValues();
@@ -128,7 +139,7 @@ public class FacetsChoiceListInitializers implements ModuleChoiceListInitializer
                 for (ExtendedPropertyDefinition def : propertyDefs) {
                     if ((!hierarchical || def.isHierarchical())
                             && (requiredType == PropertyType.UNDEFINED || def
-                                    .getRequiredType() == requiredType)) {
+                                    .getRequiredType() == requiredType) && !def.isHidden() ) {
                         propDefs.add(def);
                     }                    
                 }
@@ -144,7 +155,7 @@ public class FacetsChoiceListInitializers implements ModuleChoiceListInitializer
                     ExtendedPropertyDefinition ep = (ExtendedPropertyDefinition) def;
                     if ((!hierarchical || ep.isHierarchical())
                             && (requiredType == PropertyType.UNDEFINED || ep
-                                    .getRequiredType() == requiredType)) {
+                                    .getRequiredType() == requiredType) && !ep.isHidden()) {
                         propDefs.add(ep);
                     }
                 }

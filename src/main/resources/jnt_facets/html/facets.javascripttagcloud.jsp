@@ -22,8 +22,10 @@
 <c:set var="boundComponent"
        value="${uiComponents:getBindedComponent(currentNode, renderContext, 'j:bindedComponent')}"/>
 <template:addCacheDependency node="${boundComponent}"/>
+<jcr:nodeProperty var="facetListNodeType" node="${currentNode}" name="j:type" />
 <c:if test="${not empty boundComponent}">
     <c:set var="facetParamVarName" value="N-${boundComponent.name}"/>
+    <c:set var="facetTargetTypeName" value="N-type-${boundComponent.name}"/>
     <c:set var="activeFacetMapVarName" value="afm-${boundComponent.name}"/>
     <c:if test="${not empty param[facetParamVarName] and empty activeFacetsVars[facetParamVarName]}">
         <c:if test="${activeFacetsVars == null}">
@@ -71,6 +73,7 @@
                         var word_list = new Array(<c:forEach items="${currentFacet.values}" var="facetValue" varStatus="status">
                                 <c:if test="${not facet:isFacetValueApplied(facetValue, activeFacetsVars[activeFacetMapVarName])}">
                                 <c:url var="facetUrl" value="${url.mainResource}">
+                                <c:param name="${facetTargetTypeName}" value="${functions:encodeUrlParam(facetListNodeType)}" />
                                 <c:param name="${facetParamVarName}"
                                value="${functions:encodeUrlParam(facet:getFacetDrillDownUrl(facetValue, activeFacetsVars[facetParamVarName]))}"/>
                                 </c:url>

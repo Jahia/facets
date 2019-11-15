@@ -24,6 +24,7 @@
         <c:set var="facetParam" value="${facet:getDeleteFacetUrl2(facetValue, activeFacetsVars[facetParamVarName])}"/>
         <c:url var="facetUrl" value="${url.mainResource}">
             <c:if test="${not empty facetParam}">
+                <c:param name="${facetTargetTypeName}" value="${functions:encodeUrlParam(facetListNodeType)}" />
                 <c:param name="${facetParamVarName}" value="${functions:encodeUrlParam(facetParam)}"/>
             </c:if>
         </c:url>

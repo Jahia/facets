@@ -18,8 +18,10 @@
 <%--@elvariable id="acl" type="java.lang.String"--%>
 <template:addResources type="css" resources="facets.css"/>
 <c:set var="boundComponent" value="${uiComponents:getBindedComponent(currentNode, renderContext, 'j:bindedComponent')}"/>
+<jcr:nodeProperty var="facetListNodeType" node="${currentNode}" name="j:type" />
 <c:if test="${not empty boundComponent}">
     <c:set var="facetParamVarName" value="N-${boundComponent.name}"/>
+    <c:set var="facetTargetTypeName" value="N-type-${boundComponent.name}"/>
     <c:set var="activeFacetMapVarName" value="afm-${boundComponent.name}"/>
     <c:if test="${not empty param[facetParamVarName] and empty activeFacetsVars[facetParamVarName]}">
         <c:if test="${activeFacetsVars == null}">
@@ -38,6 +40,7 @@
 
     <template:option node="${boundComponent}" nodetype="${boundComponent.primaryNodeTypeName},jmix:list" view="hidden.load">
         <template:param name="queryLoadAllUnsorted" value="true"/>
+        <template:param name="facetListNodeType" value="${facetListNodeType}" />
     </template:option>
 
     <facet:setupQueryAndMetadata var="listQuery" boundComponent="${boundComponent}" existingQuery="${moduleMap.listQuery}"
@@ -75,6 +78,7 @@
             <c:if test="${not facet:isFacetValueApplied(facetValue, activeFacetsVars[activeFacetMapVarName])}">
                 <c:set var="facetDrillDownUrl" value="${facet:getFacetDrillDownUrl(facetValue, activeFacetsVars[facetParamVarName])}"/>
                 <c:url var="facetUrl" value="${url.mainResource}">
+                    <c:param name="${facetTargetTypeName}" value="${functions:encodeUrlParam(facetListNodeType)}" />
                     <c:param name="${facetParamVarName}" value="${functions:encodeUrlParam(facetDrillDownUrl)}"/>
                 </c:url>
                 <li><a href="${facetUrl}"><facet:facetValueLabel currentActiveFacetValue="${facetValue}" facetValueLabels="${facetValueLabels}"/></a>
