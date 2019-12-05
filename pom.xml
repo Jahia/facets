@@ -52,7 +52,7 @@
         <version>7.1.2.0</version>
     </parent>
     <artifactId>facets</artifactId>
-	<version>7.1.5-SNAPSHOT</version>
+	<version>7.3.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <name>Jahia Facets</name>
     <description>This is a custom module for running on a Jahia server.</description>
