@@ -86,8 +86,7 @@ public class FacetsChoiceListInitializers implements ModuleChoiceListInitializer
                     param, context)) {
                 ExtendedNodeType nt = propertyDef.getDeclaringNodeType();
                 String displayName = propertyDef.getLabel(locale, nt);
-                displayName += nt.isMixin() ? "" : " (" + nt.getLabel(locale)
-                        + ")";
+                displayName += " (" + nt.getLabel(locale) + ")";
                 String value = nt.getName() + ";" + propertyDef.getName();
                 propertyNames.add(new ChoiceListValue(displayName,
                         new HashMap<String, Object>(), new ValueImpl(value,
