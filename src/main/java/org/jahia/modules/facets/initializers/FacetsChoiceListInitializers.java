@@ -57,7 +57,6 @@ import javax.jcr.PropertyType;
 import javax.jcr.RepositoryException;
 import javax.jcr.Value;
 import javax.jcr.nodetype.NodeTypeIterator;
-import javax.jcr.nodetype.PropertyDefinition;
 
 import java.util.*;
 
@@ -67,7 +66,7 @@ import java.util.*;
  * Time: 3:03:45 PM
  */
 public class FacetsChoiceListInitializers implements ModuleChoiceListInitializer {
-    private transient static Logger logger = org.slf4j.LoggerFactory.getLogger(FacetsChoiceListInitializers.class);
+    private static Logger logger = org.slf4j.LoggerFactory.getLogger(FacetsChoiceListInitializers.class);
     private String key;
 
     public void setKey(String key) {
@@ -80,36 +79,32 @@ public class FacetsChoiceListInitializers implements ModuleChoiceListInitializer
 
     public List<ChoiceListValue> getChoiceListValues(ExtendedPropertyDefinition epd, String param, List<ChoiceListValue> values, Locale locale,
                                                      Map<String, Object> context) {
-        final Set<ChoiceListValue> propertyNames = new HashSet<ChoiceListValue>();
+        final Set<ChoiceListValue> propertyNames = new HashSet<>();
         try {
-            for (ExtendedPropertyDefinition propertyDef : getPropertyDefinitions(
-                    param, context)) {
+            for (ExtendedPropertyDefinition propertyDef : getPropertyDefinitions(param, context)) {
                 ExtendedNodeType nt = propertyDef.getDeclaringNodeType();
                 String displayName = propertyDef.getLabel(locale, nt);
                 displayName += " (" + nt.getLabel(locale) + ")";
                 String value = nt.getName() + ";" + propertyDef.getName();
                 propertyNames.add(new ChoiceListValue(displayName,
                         new HashMap<String, Object>(), new ValueImpl(value,
-                                PropertyType.STRING, false)));
+                        PropertyType.STRING, false)));
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
-        List<ChoiceListValue> listValues = new ArrayList<ChoiceListValue>(propertyNames);
+        List<ChoiceListValue> listValues = new ArrayList<>(propertyNames);
         Collections.sort(listValues);
         return listValues;
     }
-    
-    private List<ExtendedPropertyDefinition> getPropertyDefinitions(String param,
-            Map<String, Object> context)
+
+    private List<ExtendedPropertyDefinition> getPropertyDefinitions(String param, Map<String, Object> context)
             throws RepositoryException {
-        
         boolean hierarchical = param.contains("hierarchical");
-        int requiredType = param.contains("date") ? PropertyType.DATE
-                : PropertyType.UNDEFINED;  
-        
-        List<ExtendedPropertyDefinition> propertyDefinitions = new ArrayList<ExtendedPropertyDefinition>();
-        
+        int requiredType = param.contains("date") ? PropertyType.DATE : PropertyType.UNDEFINED;
+
+        List<ExtendedPropertyDefinition> propertyDefinitions = new ArrayList<>();
+
         JCRNodeWrapper parentNode = (JCRNodeWrapper) context.get("contextParent");
         if (parentNode == null) {
             JCRNodeWrapper nodeWrapper = (JCRNodeWrapper) context.get("contextNode");
@@ -119,7 +114,7 @@ public class FacetsChoiceListInitializers implements ModuleChoiceListInitializer
         }
 
         if (parentNode != null && parentNode.hasProperty("j:type")) {
-            Value[] targetNodeTypeValues = new Value[] { parentNode.getProperty("j:type").getValue() };
+            Value[] targetNodeTypeValues = new Value[]{parentNode.getProperty("j:type").getValue()};
             propertyDefinitions.addAll(getPropertiesForTypes(hierarchical, requiredType, targetNodeTypeValues));
         } else if (parentNode != null && parentNode.hasProperty("j:bindedComponent")) {
             JCRNodeWrapper boundNode = (JCRNodeWrapper) parentNode.getProperty("j:bindedComponent").getNode();
@@ -140,7 +135,10 @@ public class FacetsChoiceListInitializers implements ModuleChoiceListInitializer
         return propertyDefinitions;
     }
 
-    private List<ExtendedPropertyDefinition> getPropertiesForTypes(boolean hierarchical, int requiredType, Value[] nodeTypeNameValues) throws RepositoryException {
+    private List<ExtendedPropertyDefinition> getPropertiesForTypes(boolean hierarchical,
+                                                                   int requiredType,
+                                                                   Value[] nodeTypeNameValues)
+            throws RepositoryException {
         ExtendedPropertyDefinition[] propertyDefinitions = ComponentLinkerChoiceListInitializer.getCommonChildNodeDefinitions(nodeTypeNameValues,
                 true, true, new LinkedHashSet<String>());
         return getPropertiesForType(hierarchical, requiredType, propertyDefinitions);
