@@ -49,19 +49,26 @@
     <parent>
         <groupId>org.jahia.modules</groupId>
         <artifactId>jahia-modules</artifactId>
-        <version>7.1.2.0</version>
+        <version>7.5.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>facets</artifactId>
-	<version>7.3.0-SNAPSHOT</version>
+	<version>8.0.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <name>Jahia Facets</name>
     <description>This is a custom module for running on a Jahia server.</description>
+
     <scm>
         <connection>scm:git:git@github.com:Jahia/facets.git</connection>
         <developerConnection>scm:git:git@github.com:Jahia/facets.git</developerConnection>
         <url>scm:git:git@github.com:Jahia/facets.git</url>
       <tag>HEAD</tag>
-  </scm>
+    </scm>
+
+    <properties>
+        <require-capability>osgi.extender;filter:="(osgi.extender=org.jahia.bundles.blueprint.extender.config)"</require-capability>
+        <jahia-module-signature>MC0CFHqMlie72U4A8XpZ4xu6/C/9CLn1AhUAgCc9k1ucTn+pPCnyBHkEKExGwTs=</jahia-module-signature>
+    </properties>
+
     <repositories>
         <repository>
             <releases>
@@ -76,6 +83,7 @@
             <url>https://devtools.jahia.com/nexus/content/groups/public</url>
         </repository>
     </repositories>
+
     <dependencies>
         <dependency>
             <groupId>org.jahia.test</groupId>
@@ -84,4 +92,16 @@
             <scope>test</scope>
         </dependency>
     </dependencies>    
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
