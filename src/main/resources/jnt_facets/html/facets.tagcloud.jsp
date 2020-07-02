@@ -44,9 +44,9 @@
     </template:option>
 
     <facet:setupQueryAndMetadata var="listQuery" boundComponent="${boundComponent}" existingQuery="${moduleMap.listQuery}"
-                                 activeFacets="${activeFacetsVars[activeFacetMapVarName]}"/>
+                                 activeFacets="${not empty activeFacetsVars ? activeFacetsVars[activeFacetMapVarName] : null}"/>
     <jcr:jqom var="result" qomBeanName="listQuery" scope="request"/>
-    <c:if test="${!empty activeFacetsVars[activeFacetMapVarName]}">
+    <c:if test="${!empty activeFacetsVars and !empty activeFacetsVars[activeFacetMapVarName]}">
         <div class="facets">
             <%@include file="activeFacets.jspf" %>
         </div>
@@ -69,11 +69,11 @@
                 <c:forEach items="${result.facetFields}" var="currentFacet">
                     <ul>
                         <c:forEach items="${currentFacet.values}" var="facetValue">
-                            <c:if test="${not facet:isFacetValueApplied(facetValue, activeFacetsVars[activeFacetMapVarName])}">
+                            <c:if test="${not facet:isFacetValueApplied(facetValue, not empty activeFacetsVars ? activeFacetsVars[activeFacetMapVarName] : null)}">
                                 <c:url var="facetUrl" value="${url.mainResource}">
                                     <c:param name="${facetTargetTypeName}" value="${functions:encodeUrlParam(facetListNodeType)}" />
                                     <c:param name="${facetParamVarName}"
-                                             value="${functions:encodeUrlParam(facet:getFacetDrillDownUrl(facetValue, activeFacetsVars[facetParamVarName]))}"/>
+                                             value="${functions:encodeUrlParam(facet:getFacetDrillDownUrl(facetValue, not empty activeFacetsVars ? activeFacetsVars[facetParamVarName] : null]))}"/>
                                 </c:url>
                                 <li><a href="${facetUrl}"
                                        class="tag${functions:round(10 * tagCloud[facetValue.name] / totalUsages)}0">
