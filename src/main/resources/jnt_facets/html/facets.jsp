@@ -23,7 +23,7 @@
     <c:set var="facetParamVarName" value="N-${boundComponent.name}"/>
     <c:set var="facetTargetTypeName" value="N-type-${boundComponent.name}"/>
     <c:set var="activeFacetMapVarName" value="afm-${boundComponent.name}"/>
-    <c:if test="${not empty param[facetParamVarName] and empty activeFacetsVars[facetParamVarName]}">
+    <c:if test="${not empty param[facetParamVarName] and ((empty activeFacetsVars) or (empty activeFacetsVars[facetParamVarName]))}">
         <c:if test="${activeFacetsVars == null}">
             <jsp:useBean id="activeFacetsVars" class="java.util.HashMap" scope="request"/>
         </c:if>
@@ -44,12 +44,12 @@
     </template:option>
 
     <facet:setupQueryAndMetadata var="listQuery" boundComponent="${boundComponent}" existingQuery="${moduleMap.listQuery}"
-                                 activeFacets="${activeFacetsVars[activeFacetMapVarName]}"/>
+                                 activeFacets="${not empty activeFacetsVars ? activeFacetsVars[activeFacetMapVarName] : null}"/>
     <jcr:jqom var="result" qomBeanName="listQuery" scope="request"/>
-    <c:if test="${not result.facetResultsEmpty or !empty activeFacetsVars[activeFacetMapVarName]}">
+    <c:if test="${not result.facetResultsEmpty or (not empty activeFacetsVars and not empty activeFacetsVars[activeFacetMapVarName])}">
         <div class="facets">
         <%@include file="activeFacets.jspf" %>
-        <c:if test="${facet:isUnappliedFacetExisting(result, activeFacetsVars[activeFacetMapVarName])}">
+        <c:if test="${facet:isUnappliedFacetExisting(result, not empty activeFacetsVars ? activeFacetsVars[activeFacetMapVarName] : null)}">
             <h4><fmt:message key="facets.SelectFilter"/></h4> <br/>
         </c:if>
         <c:forEach items="${result.facetFields}" var="currentFacet">
@@ -75,7 +75,7 @@
                 <h5>${mappedFacetLabel}</h5>
                 <ul>
             </c:if>
-            <c:if test="${not facet:isFacetValueApplied(facetValue, activeFacetsVars[activeFacetMapVarName])}">
+            <c:if test="${not facet:isFacetValueApplied(facetValue, not empty activeFacetsVars ? activeFacetsVars[activeFacetMapVarName] : null)}">
                 <c:set var="facetDrillDownUrl" value="${facet:getFacetDrillDownUrl(facetValue, activeFacetsVars[facetParamVarName])}"/>
                 <c:url var="facetUrl" value="${url.mainResource}">
                     <c:param name="${facetTargetTypeName}" value="${functions:encodeUrlParam(facetListNodeType)}" />

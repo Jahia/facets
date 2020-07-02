@@ -46,9 +46,9 @@
     </template:option>
 
     <facet:setupQueryAndMetadata var="listQuery" boundComponent="${boundComponent}" existingQuery="${moduleMap.listQuery}"
-                                 activeFacets="${activeFacetsVars[activeFacetMapVarName]}"/>
+                                 activeFacets="${not empty activeFacetsVars ? activeFacetsVars[activeFacetMapVarName] : null}"/>
     <jcr:jqom var="result" qomBeanName="listQuery" scope="request"/>
-    <c:if test="${!empty activeFacetsVars[activeFacetMapVarName]}">
+    <c:if test="${!empty activeFacetsVars and !empty activeFacetsVars[activeFacetMapVarName]}">
         <div class="facets">
             <%@include file="activeFacets.jspf" %>
         </div>
@@ -71,11 +71,11 @@
                 <template:addResources type="inlinejavascript" key="wordListForCloud">
                     <script type="text/javascript">
                         var word_list = new Array(<c:forEach items="${currentFacet.values}" var="facetValue" varStatus="status">
-                                <c:if test="${not facet:isFacetValueApplied(facetValue, activeFacetsVars[activeFacetMapVarName])}">
+                                <c:if test="${not facet:isFacetValueApplied(facetValue, not empty activeFacetsVars ? activeFacetsVars[activeFacetMapVarName] : null)}">
                                 <c:url var="facetUrl" value="${url.mainResource}">
                                 <c:param name="${facetTargetTypeName}" value="${functions:encodeUrlParam(facetListNodeType)}" />
                                 <c:param name="${facetParamVarName}"
-                               value="${functions:encodeUrlParam(facet:getFacetDrillDownUrl(facetValue, activeFacetsVars[facetParamVarName]))}"/>
+                               value="${functions:encodeUrlParam(facet:getFacetDrillDownUrl(facetValue, not empty activeFacetsVars ? activeFacetsVars[facetParamVarName] : null))}"/>
                                 </c:url>
                                 <facet:facetValueLabel currentFacetFieldName="${currentFacet.name}"
                                facetValueCount="${facetValue}"
