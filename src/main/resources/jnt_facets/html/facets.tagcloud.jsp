@@ -73,7 +73,7 @@
                                 <c:url var="facetUrl" value="${url.mainResource}">
                                     <c:param name="${facetTargetTypeName}" value="${functions:encodeUrlParam(facetListNodeType)}" />
                                     <c:param name="${facetParamVarName}"
-                                             value="${functions:encodeUrlParam(facet:getFacetDrillDownUrl(facetValue, not empty activeFacetsVars ? activeFacetsVars[facetParamVarName] : null]))}"/>
+                                             value="${functions:encodeUrlParam(facet:getFacetDrillDownUrl(facetValue, not empty activeFacetsVars ? activeFacetsVars[facetParamVarName] : null))}"/>
                                 </c:url>
                                 <li><a href="${facetUrl}"
                                        class="tag${functions:round(10 * tagCloud[facetValue.name] / totalUsages)}0">
