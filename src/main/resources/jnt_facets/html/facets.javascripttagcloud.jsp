@@ -81,7 +81,7 @@
                                facetValueCount="${facetValue}"
                                facetValueLabels="${facetValueLabels}"
                                facetValueFormats="${facetValueFormats}" display="false"/>
-                                {text: "${facetValueLabel}", weight:${functions:round(10 * tagCloud[facetValue.name] / totalUsages)}, url: "${facetUrl}"}
+                                {text: "${functions:escapeJavaScript(fn:escapeXml(facetValueLabel))}", weight:${functions:round(10 * tagCloud[facetValue.name] / totalUsages)}, url: "${facetUrl}"}
                                 <c:if test="${not status.last}">, </c:if>
                                 </c:if>
                                 </c:forEach>);

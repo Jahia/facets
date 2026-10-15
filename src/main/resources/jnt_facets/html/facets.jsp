@@ -72,7 +72,7 @@
                 <c:set var="currentFacetLabel" value="${mappedFacetLabel}"/>
 
                 <div class="facetsList">
-                <h5>${mappedFacetLabel}</h5>
+                <h5>${fn:escapeXml(mappedFacetLabel)}</h5>
                 <ul>
             </c:if>
             <c:if test="${not facet:isFacetValueApplied(facetValue, not empty activeFacetsVars ? activeFacetsVars[activeFacetMapVarName] : null)}">
